@@ -34,6 +34,12 @@ db.movies.update(
   { $set: { "Director.Bio": "!UPDATE!" } }
 )
 
+//update director information
+db.movies.updateMany(
+  { "Director.Name": "Jordan Peele"},
+  {$set: {"Director.Bio": "!UPDATE"}}
+)
+
 //add favorite movie
 db.users.update(
   { Username: "Matt Green" },
