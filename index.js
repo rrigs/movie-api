@@ -1,7 +1,10 @@
 const express = require("express"),
   morgan = require("morgan"),
   bodyParser = require("body-parser"),
-  uuid = require("uuid");
+  uuid = require("uuid"),
+  passport = require("passport");
+
+require("./passport");
 
 mongoose = require("mongoose");
 Models = require("./models.js");
@@ -11,85 +14,104 @@ const Movies = Models.Movie;
 const Users = Models.User;
 
 // local connection
-mongoose.connect("mongodb://localhost:27017/myFlixDB", {useNewUrlParser: true});
+mongoose.connect("mongodb://localhost:27017/myFlixDB", {
+  useNewUrlParser: true,
+});
 
 app.use(morgan("common"));
 app.use(express.static("public"));
 app.use(bodyParser.json());
+
+let auth = require("./auth")(app);
 
 app.get("/", function (req, res) {
   return res.status(400).send("Welcome to my Flix App!");
 });
 
 //get list of all movies
-app.get("/movies", function (
-  req,
-  res
-) {
-  Movies.find()
-    .then(function (movies) {
-      res.status(201).json(movies);
-    })
-    .catch(function (err) {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/movies",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    Movies.find()
+      .then(function (movies) {
+        res.status(201).json(movies);
+      })
+      .catch(function (err) {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //get data about movie by title
-app.get("/movies/:Title", function (req, res) {
-  Movies.findOne({ Title: req.params.Title })
-    .then(function (movies) {
-      res.json(movies);
-    })
-    .catch(function (err) {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/movies/:Title",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    Movies.findOne({ Title: req.params.Title })
+      .then(function (movies) {
+        res.json(movies);
+      })
+      .catch(function (err) {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //get data about director
-app.get("/movies/director/:Name", function (req, res) {
-  Movies.findOne({ "Director.Name": req.params.Name })
-    .then(function (movies) {
-      res.json(movies.Director);
-    })
-    .catch(function (err) {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/movies/director/:Name",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    Movies.findOne({ "Director.Name": req.params.Name })
+      .then(function (movies) {
+        res.json(movies.Director);
+      })
+      .catch(function (err) {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //get data about genre by name
-app.get("/movies/genre/:Name", function (req, res) {
-  Movies.findOne({ "Genre.Name": req.params.Name })
-    .then(function (movies) {
-      res.json(movies.Genre);
-    })
-    .catch(function (err) {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/movies/genre/:Name",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    Movies.findOne({ "Genre.Name": req.params.Name })
+      .then(function (movies) {
+        res.json(movies.Genre);
+      })
+      .catch(function (err) {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //get list of users
-app.get("/users", function (
-  req,
-  res
-) {
-  Users.find()
-    .then(function (users) {
-      res.status(201).json(users);
-    })
-    .catch(function (err) {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/users",
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    Users.find()
+      .then(function (users) {
+        res.status(201).json(users);
+      })
+      .catch(function (err) {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //get a user by username
 app.get(
   "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     Users.findOne({ Username: req.params.Username })
       .then(function (user) {
@@ -136,6 +158,7 @@ app.post(
 //delete user by username
 app.delete(
   "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     Users.findOneAndRemove({ Username: req.params.Username })
       .then(function (user) {
@@ -155,6 +178,7 @@ app.delete(
 //update user info by username
 app.put(
   "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     Users.findOneAndUpdate(
       { Username: req.params.Username },
@@ -182,6 +206,7 @@ app.put(
 //add movie to favorites list
 app.post(
   "/users/:Username/movies/:MovieID",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     Users.findOneAndUpdate(
       { Username: req.params.Username },
@@ -204,6 +229,7 @@ app.post(
 // delete movie from favorites list
 app.delete(
   "/users/:Username/Movies/:MovieID",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     Users.findOneAndUpdate(
       { Username: req.params.Username },
@@ -224,4 +250,4 @@ app.delete(
 var port = process.env.PORT || 8080;
 app.listen(port, "0.0.0.0", function () {
   console.log("Your app is listening on port 8080");
-  });
+});
