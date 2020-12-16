@@ -1,3 +1,19 @@
+const cors = require("cors");
+
+let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      let message = "The CORS policy for this application doesn't allow access from origin " + origin;
+      return callback(new Error(message), false);
+    }
+    return callback(null, true);
+  }
+}));
+
+const { check, validationResult } = require("express-validator");
+
 const express = require("express"),
   morgan = require("morgan"),
   bodyParser = require("body-parser"),
@@ -127,7 +143,14 @@ app.get(
 //add new user
 app.post(
   "/users",
+  [
+    check("Username", "Username is required").isLength({ min: 5 }),
+    check("Username", "Username contains non alphanumeric characters - not allowed.").isAlphanumeric(),
+    check("Password", "Password is required").not().isEmpty(),
+    check("Email", "Email does not appear to be valid").isEmail()
+  ],
   (req, res) => {
+    let hashedPassword = Users.hashPassword(req.body.Password);
     Users.findOne({ Username: req.body.Username })
       .then(function (user) {
         if (user) {
@@ -135,7 +158,7 @@ app.post(
         } else {
           Users.create({
             Username: req.body.Username,
-            Password: req.body.Password,
+            Password: hashedPassword,
             Email: req.body.Email,
             Birthday: req.body.Birthday,
           })
@@ -247,7 +270,7 @@ app.delete(
   }
 );
 
-var port = process.env.PORT || 8080;
-app.listen(port, "0.0.0.0", function () {
-  console.log("Your app is listening on port 8080");
+const port = process.env.PORT || 8080;
+app.listen(port, "0.0.0.0",() => {
+  console.log("Listening on Port " + port);
 });
