@@ -1,6 +1,24 @@
-const cors = require("cors");
+const express = require("express"),
+  morgan = require("morgan"),
+  bodyParser = require("body-parser"),
+  uuid = require("uuid");
 
-let allowedOrigins = ["http://localhost:8080", "http://testsite.com"];
+require("./passport");
+
+const mongoose = require("mongoose");
+const Models = require("./models.js");
+const Movies = Models.Movie;
+const Users = Models.User;
+
+const { check, validationResult } = require("express-validator");
+
+const app = express();
+
+const cors = require("cors");
+app.use(cors());
+
+let allowedOrigins = ["http://localhost:8080", "https://my-flix-db-app.herokuapp.com/"];
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
@@ -10,24 +28,8 @@ app.use(cors({
     }
     return callback(null, true);
   }
-}));
-
-const { check, validationResult } = require("express-validator");
-
-const express = require("express"),
-  morgan = require("morgan"),
-  bodyParser = require("body-parser"),
-  uuid = require("uuid"),
-  passport = require("passport");
-
-require("./passport");
-
-mongoose = require("mongoose");
-Models = require("./models.js");
-
-const app = express();
-const Movies = Models.Movie;
-const Users = Models.User;
+})
+);
 
 // local connection
 // mongoose.connect("mongodb://localhost:27017/myFlixDB", {
@@ -36,7 +38,8 @@ const Users = Models.User;
 
 //online connection
 mongoose.connect(process.env.CONNECTION_URI, {
-  useNewUrlParser: true, useUnifiedTopology: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 app.use(morgan("common"));
@@ -44,6 +47,8 @@ app.use(express.static("public"));
 app.use(bodyParser.json());
 
 let auth = require("./auth")(app);
+
+const passport = require("passport");
 
 app.get("/", function (req, res) {
   return res.status(400).send("Welcome to my Flix App!");
