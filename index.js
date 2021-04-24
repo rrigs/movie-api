@@ -36,7 +36,9 @@ app.use(cors({
 //   useNewUrlParser: true, useUnifiedTopology: true
 // });
 
-//online connection
+/**
+ * Online connection to MongoDB Atlas database:
+ */
 mongoose.connect(process.env.CONNECTION_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -50,11 +52,16 @@ let auth = require("./auth")(app);
 
 const passport = require("passport");
 
+/**
+ * Get homepage endpoint
+ */
 app.get("/", function (req, res) {
   return res.status(400).send("Welcome to my Flix App!");
 });
 
-//get list of all movies
+/**
+ *Get list of all movies
+ */
 app.get(
   "/movies",
   passport.authenticate("jwt", { session: false }),
@@ -70,7 +77,9 @@ app.get(
   }
 );
 
-//get data about movie by title
+/**
+ * Get data about movie by title
+ */
 app.get(
   "/movies/:Title",
   passport.authenticate("jwt", { session: false }),
@@ -86,7 +95,9 @@ app.get(
   }
 );
 
-//get data about director
+/**
+*Get data about director 
+*/
 app.get(
   "/movies/director/:Name",
   passport.authenticate("jwt", { session: false }),
@@ -102,7 +113,9 @@ app.get(
   }
 );
 
-//get data about genre by name
+/**
+ * Get data about genre by name
+ */
 app.get(
   "/movies/genre/:Name",
   passport.authenticate("jwt", { session: false }),
@@ -118,7 +131,9 @@ app.get(
   }
 );
 
-//get list of users
+/**
+ * Get list of users
+ */
 app.get(
   "/users",
   passport.authenticate("jwt", { session: false }),
@@ -134,7 +149,9 @@ app.get(
   }
 );
 
-//get a user by username
+/**
+ * Get a user by username
+ */
 app.get(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
@@ -150,7 +167,9 @@ app.get(
   }
 );
 
-//add new user
+/**
+ * Add new user
+ */
 app.post(
   "/users",
   [
@@ -188,7 +207,9 @@ app.post(
   }
 );
 
-//delete user by username
+/**
+ * Delete user by username
+ */
 app.delete(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
@@ -208,7 +229,9 @@ app.delete(
   }
 );
 
-//update user info by username
+/**
+ * Update user info by username
+ */
 app.put(
   "/users/:Username",
   [
@@ -242,7 +265,9 @@ app.put(
   }
 );
 
-//add movie to favorites list
+/**
+ * Add movie to favorites list
+ */
 app.post(
   "/users/:Username/movies/:MovieID",
   passport.authenticate("jwt", { session: false }),
@@ -265,7 +290,9 @@ app.post(
   }
 );
 
-// delete movie from favorites list
+/**
+ * Delete movie from favorites list
+ */
 app.delete(
   "/users/:Username/Movies/:MovieID",
   passport.authenticate("jwt", { session: false }),
